@@ -86,6 +86,8 @@ so don't look for beautiful code.
 		);		
 	}
 
+You can certainly disagree with my sense of style, but I thought the above was a little more elegant than what the original C<ses-send-email.pl> gave you. 
+
 =head2 new
 
 C<new> currently takes one paramater, C<-creds>, which should be the path to your B<AWS Credentials file> 
