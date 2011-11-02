@@ -1,0 +1,116 @@
+=pod
+
+=head1 NAME
+
+Net::Amazon::SES
+
+=head1 DESCRIPTION
+
+This module is based on the work done at: 
+
+L<http://aws-catalog-download-files.s3.amazonaws.com/AmazonSES-2011-10-12.zip> 
+
+Except that: 
+
+=over
+
+=item * There's an OO API
+
+=item * All it does is send email
+
+=item * there's really only one public method 
+
+Other than, C<new>, you also have, C<send_msg> - guess what that does? 
+
+=item * A persistent connection is used
+
+This is done simply by reusing the B<LWP::UserAgent> object internally and passing the, C<keep_alive> paramater. 
+
+=back
+
+I am sincerely no wizard of network programming and this is my first stab and making this work out. It's uncertain if this hack is all that you really will need to make this all work. 
+
+Let's see! 
+
+=head1 REASONING
+
+The included tools for Perl that can be downloaded from Amazon for SES: 
+
+L<http://aws-catalog-download-files.s3.amazonaws.com/AmazonSES-2011-10-12.zip>
+
+Are somewhat lacking. The command line tool and the functional SES.pm module aren't very flexible and 
+the coding style is somewhat awkward - I'm not sure if Perl is the author's primary scripting language. 
+
+My clients are running into performance problems of piping to a outside script and having that script create one connection per 
+email sent. The speed at which emails can be sent is around 1 message/second. 
+
+So, this is my attempt to create a Perl Module with an OO API that does a few things: 
+
+=over
+
+=item * Simplifies the API
+
+Piping to an outside command is simple enough, but not very efficient. I wanted to replace that, but still have something simple to work with. 
+
+=item * Allows you to use a persistent HTTP connection, instead of one connection per email message
+
+=back
+
+=head1 Code Status: Ugly Hack
+
+All code is very much in alpha and is based very closely on the original, C<SES.pm> module. It's currently at the status of: B<Ugly Hack>, 
+so don't look for beautiful code. 
+
+=head1 API
+
+	use Net::Amazon::SES; 
+
+	my $ses = Net::Amazon::SES->new(
+		{ 
+			-creds => $path_to_amazon_creds_file, 
+		}
+	); 
+
+	$ses->send_msg(
+		{ 
+			-msg => $my_email_msg, 
+		}
+	); 
+	
+	# Or, send a few messages
+	foreach(@pre_created_msgs){ 
+		$ses->send_msg(
+			{ 
+				-msg => $_, 
+			}
+		);		
+	}
+
+=head2 new
+
+C<new> currently takes one paramater, C<-creds>, which should be the path to your B<AWS Credentials file> 
+
+=head2 send_msg
+
+C<send_msg> currently takes one paramater, C<-msg>, which should simply be the email message itself, as a string. Something like: 
+
+	From: you@example.com
+	To: me@example.com
+	Subject: Test Message!
+	
+	We did it! It works!
+
+Will do, just nicely. 
+
+B<returns> the response C<code> and C<content>. 
+
+=head1 Please Help!
+
+I can't be the only one that has this same problem and I would love people to help out. Fork and Request Pulls! Please! I am also in no way committed to the name of this module and am in no one ready to submit this to CPAN under its current B<Ugly Hack> state. 
+
+Thanks! 
+
+
+
+
+=end
