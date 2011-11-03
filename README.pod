@@ -61,6 +61,14 @@ Piping to an outside command is simple enough, but not very efficient. I wanted 
 All code is very much in alpha and is based very closely on the original, C<SES.pm> module. It's currently at the status of: B<Ugly Hack>, 
 so don't look for beautiful code. 
 
+=head1 Real World Performance
+
+Calling the module directly, using a persistent connection and not piping to the  C<ses-send-email.pl> script will 
+show speed ups of delivering mail to the Amazon SES web service by around 200%. In my tests, 
+that means each message takes around .3 second to post.  It seems the overhead of each connection is around .3 - .6 seconds - and that's what you'll save
+with each message sent. 
+
+
 =head1 API
 
 	use Net::Amazon::SES; 
@@ -91,6 +99,8 @@ You can certainly disagree with my sense of style, but I thought the above was a
 =head2 new
 
 C<new> currently takes one paramater, C<-creds>, which should be the path to your B<AWS Credentials file> 
+
+The C<-trace> paramater may also be passed. If passed with a value of, C<1>, the module will C<carp> into whatever is set up to receive STDERR. Handy for debugging. 
 
 =head2 send_msg
 

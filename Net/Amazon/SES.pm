@@ -29,6 +29,7 @@ use LWP 6;
 use LWP::Protocol::https;
 use Carp qw(croak carp); 
 use vars qw($AUTOLOAD); 
+#use Time::HiRes qw(gettimeofday); 
 
 
 my $endpoint = 'https://email.us-east-1.amazonaws.com/';
@@ -51,8 +52,9 @@ my $unsafe_characters = "^A-Za-z0-9\-\._~";
 
 
 my %allowed = (
-		browser => {}, 
-		creds => '', 
+		browser => undef, 
+		creds   => '', 
+		trace   => 0, 
 		
 );
 sub new {
@@ -101,14 +103,23 @@ sub _init  {
 	my $self    = shift; 
 	my $args    = shift;
 
+	if(exists($args->{-trace})){ 
+		$self->trace($args->{-trace}); 
+	}
+	
 	$self->browser($self->reset_browser); 
 	$self->creds($args->{-creds}); 
+	
+
 	
 }
 
 sub reset_browser { 
 	my $self = shift; 
 	
+	if($self->trace){ 
+		carp "creating a new browser"; 
+	}	
 	my $browser = LWP::UserAgent->new(
 		agent => "SES-Perl-$tools_version/$service_version",
 		keep_alive => 5, 
@@ -350,6 +361,7 @@ sub call_ses {
 	
 	my $self = shift; 
 	
+	#my $t0 = gettimeofday();
     my $params = shift;
     my $opts = shift;
 
@@ -371,10 +383,19 @@ sub call_ses {
     }
 
     my $payload = $self->build_payload;
-
-	my $browser = $self->browser; 
 	
-    my $request = new HTTP::Request 'POST', $endpoint;
+	my$browser = $self->browser; 
+	if(!defined($browser)){ 
+		if($self->trace){ 
+			carp "browser is not defined?"; 
+		}	
+		$self->browser($self->reset_browser);
+		$browser = $self->browser; 
+	}
+    
+
+
+	my $request = new HTTP::Request 'POST', $endpoint;
     $request->header("If-SSL-Cert-Subject" => "/CN=$endpoint_name");
     $request->content($payload);
     $request->content_type('application/x-www-form-urlencoded');
@@ -383,9 +404,10 @@ sub call_ses {
     }
     my $response = $browser->request($request);
 
-    # print the detailed response in verbose mode
-    print($response->content) if ($opts{'verbose'});
-
+	if ($self->trace){
+    #	carp $response->content;
+	}
+	
     my $status = $response->is_success;
     if (!$status) {
         my $content = $response->content;
@@ -395,6 +417,11 @@ sub call_ses {
         }
         print STDERR $errmsg, "\n";
     }
+	if($self->trace){ 
+		carp $response->status_line( );
+	}
+	#my $t1 = gettimeofday();
+	#carp "mailing time: " . ($t1 - $t0);
     return ($response->code, $response->content);
 }
 
@@ -402,4 +429,4 @@ sub DESTORY {
 	my $self = shift; 
 }
 
-1; 
+1;
