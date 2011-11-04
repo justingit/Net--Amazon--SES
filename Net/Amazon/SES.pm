@@ -29,6 +29,8 @@ use LWP 6;
 use LWP::Protocol::https;
 use Carp qw(croak carp); 
 use vars qw($AUTOLOAD); 
+use Encode qw(encode); 
+
 #use Time::HiRes qw(gettimeofday); 
 
 
@@ -52,9 +54,10 @@ my $unsafe_characters = "^A-Za-z0-9\-\._~";
 
 
 my %allowed = (
-		browser => undef, 
-		creds   => '', 
-		trace   => 0, 
+		browser     => undef, 
+		creds       => '', 
+		trace       => 0, 
+		encode_utf8 => 1,
 		
 );
 sub new {
@@ -139,7 +142,10 @@ sub send_msg {
 	else { 
 		croak "you MUST pass a message in, '-msg!'"; 
 	}
-		
+	
+	if($self->encode_utf8) { 
+		$msg = encode('UTF-8', $msg);  
+	}
 	require MIME::Base64;
 	my $params = {
 		'RawMessage.Data'                                 => MIME::Base64::encode_base64($msg), 
