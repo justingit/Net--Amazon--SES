@@ -102,7 +102,7 @@ C<new> currently takes one paramater, C<-creds>, which should be the path to you
 
 The, C<-trace> paramater may also be passed. If passed with a value of, C<1>, the module will C<carp> into whatever is set up to receive STDERR. Handy for debugging. 
 
-The, <C<-encode_utf8> paramater may also be passed. If pass with a value of, C<1>, the message you pass will be encoded with the UTF-8 character set in mind. 
+The, <C<-encode_utf8> paramater may also be passed. If passed with a value of, C<1>, the message you pass will be encoded with the UTF-8 character set in mind. 
 This is the default. Passing a value of, C<0> will disable this encoding, although I do not know why you would do such a silly thing. 
 
 
